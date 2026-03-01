@@ -41,7 +41,7 @@ gem "rack-mini-profiler"
 gem "sentry-ruby"
 gem "sentry-rails"
 gem "sentry-sidekiq"
-gem "posthog-ruby"
+# gem "posthog-ruby" # Removed: analytics tracking without user consent
 gem "logtail-rails"
 gem "skylight", groups: [ :production ]
 

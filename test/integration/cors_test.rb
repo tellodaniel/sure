@@ -8,15 +8,14 @@ class CorsTest < ActionDispatch::IntegrationTest
     assert_includes middleware_classes, Rack::Cors, "Rack::Cors should be in middleware stack"
   end
 
-  test "cors headers are returned for api endpoints" do
+  test "cors headers are returned for api endpoints from localhost" do
     get "/api/v1/usage", headers: { "Origin" => "http://localhost:3000" }
 
-    assert_equal "*", response.headers["Access-Control-Allow-Origin"]
+    assert_equal "http://localhost:3000", response.headers["Access-Control-Allow-Origin"]
     assert response.headers["Access-Control-Expose-Headers"].present?
   end
 
   test "cors preflight request is handled for api endpoints" do
-    # Simulate a preflight OPTIONS request
     options "/api/v1/transactions",
       headers: {
         "Origin" => "http://localhost:3000",
@@ -25,17 +24,17 @@ class CorsTest < ActionDispatch::IntegrationTest
       }
 
     assert_response :ok
-    assert_equal "*", response.headers["Access-Control-Allow-Origin"]
+    assert_equal "http://localhost:3000", response.headers["Access-Control-Allow-Origin"]
     assert response.headers["Access-Control-Allow-Methods"].present?
     assert_includes response.headers["Access-Control-Allow-Methods"], "POST"
   end
 
-  test "cors headers are returned for oauth endpoints" do
+  test "cors headers are returned for oauth endpoints from localhost" do
     post "/oauth/token",
       params: { grant_type: "authorization_code", code: "test" },
       headers: { "Origin" => "http://localhost:3000" }
 
-    assert_equal "*", response.headers["Access-Control-Allow-Origin"]
+    assert_equal "http://localhost:3000", response.headers["Access-Control-Allow-Origin"]
   end
 
   test "cors preflight request is handled for oauth endpoints" do
@@ -47,15 +46,15 @@ class CorsTest < ActionDispatch::IntegrationTest
       }
 
     assert_response :ok
-    assert_equal "*", response.headers["Access-Control-Allow-Origin"]
+    assert_equal "http://localhost:3000", response.headers["Access-Control-Allow-Origin"]
   end
 
-  test "cors headers are returned for session endpoints" do
+  test "cors headers are returned for session endpoints from localhost" do
     post "/sessions",
       params: { email: "test@example.com", password: "password" },
       headers: { "Origin" => "http://localhost:3000" }
 
-    assert_equal "*", response.headers["Access-Control-Allow-Origin"]
+    assert_equal "http://localhost:3000", response.headers["Access-Control-Allow-Origin"]
   end
 
   test "cors preflight request is handled for session endpoints" do
@@ -67,6 +66,12 @@ class CorsTest < ActionDispatch::IntegrationTest
       }
 
     assert_response :ok
-    assert_equal "*", response.headers["Access-Control-Allow-Origin"]
+    assert_equal "http://localhost:3000", response.headers["Access-Control-Allow-Origin"]
+  end
+
+  test "cors rejects requests from non-localhost origins by default" do
+    get "/api/v1/usage", headers: { "Origin" => "https://evil.com" }
+
+    assert_nil response.headers["Access-Control-Allow-Origin"]
   end
 end

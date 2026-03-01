@@ -2,15 +2,25 @@
 
 # CORS configuration for API access from mobile clients (Flutter) and other external apps.
 #
-# This enables Cross-Origin Resource Sharing for the /api, /oauth, and /sessions endpoints,
-# allowing the Flutter mobile client and other authorized clients to communicate
-# with the Rails backend.
+# By default, only same-origin requests are allowed. To allow external clients
+# (e.g., a Flutter mobile app), set CORS_ALLOWED_ORIGINS to a comma-separated
+# list of origins:
+#
+#   CORS_ALLOWED_ORIGINS=https://app.example.com,capacitor://localhost
+#
+# Set CORS_ALLOWED_ORIGINS=* to allow any origin (not recommended for production).
 
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
-    # Allow requests from any origin for API endpoints
-    # Mobile apps and development environments need flexible CORS
-    origins "*"
+    allowed = ENV.fetch("CORS_ALLOWED_ORIGINS", "").split(",").map(&:strip).reject(&:blank?)
+
+    if allowed.include?("*")
+      origins "*"
+    elsif allowed.any?
+      origins(*allowed)
+    else
+      origins(/\Ahttps?:\/\/localhost(:\d+)?\z/)
+    end
 
     # API endpoints for mobile client and third-party integrations
     resource "/api/*",

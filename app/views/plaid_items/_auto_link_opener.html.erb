@@ -1,7 +1,7 @@
 <%# locals: (link_token:, region:, item_id:, is_update: false) %>
 
 <% content_for :plaid_link, flush: true do %>
-  <%= javascript_include_tag "https://cdn.plaid.com/link/v2/stable/link-initialize.js" %>
+  <%# Plaid Link CDN removed for privacy — Plaid is not available in all regions %>
 <% end %>
 
 <%= tag.div data: {
